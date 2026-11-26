@@ -86,12 +86,18 @@ CRONOLOGIA
   testar entre máquinas de verdade. No meu Mac o Terminal não
   achava o Java (o JDK do Homebrew não estava no PATH), então
   coloquei ele no PATH. Depois rodei o servidor no outro
-  computador (172.16.234.28, porta 3000) e o cliente no meu Mac.
+  computador, um Windows (172.16.234.28, porta 3000), e o
+  cliente no meu Mac.
   O cliente conectou, recebeu a capacidade da outra máquina (12
   processadores), mandou o vetor de 8 elementos pela rede e
   recebeu de volta ordenado: [-99, -96, -77, -60, 13, 55, 96,
   116], em 225ms. Quase todo esse tempo é de rede e de abrir a
-  conexão. Os prints 08 e 09 mostram esse teste.
+  conexão. No log do servidor, no Windows, dá pra ver o cliente
+  conectando a partir do meu IP (172.16.234.185) e a ordenação
+  paralela com 8 ordenadoras (uma por elemento, já que o vetor
+  tinha só 8), concluída em 54ms. Os prints 08 e 09 (cliente) e
+  10 e 11 (servidor) mostram esse teste. O mesmo código rodou no
+  Mac e no Windows sem nenhuma mudança.
 
 --------------------------------------------------------------
 IMPRESSÕES
