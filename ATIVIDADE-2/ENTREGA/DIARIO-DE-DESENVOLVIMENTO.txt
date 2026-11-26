@@ -81,6 +81,18 @@ CRONOLOGIA
   primeiro. Refiz esperando o primeiro cliente conectar antes de
   soltar o segundo.
 
+26/11 08:55 ~ 09:04
+  Subi o projeto no GitHub pra baixar em outro computador e
+  testar entre máquinas de verdade. No meu Mac o Terminal não
+  achava o Java (o JDK do Homebrew não estava no PATH), então
+  coloquei ele no PATH. Depois rodei o servidor no outro
+  computador (172.16.234.28, porta 3000) e o cliente no meu Mac.
+  O cliente conectou, recebeu a capacidade da outra máquina (12
+  processadores), mandou o vetor de 8 elementos pela rede e
+  recebeu de volta ordenado: [-99, -96, -77, -60, 13, 55, 96,
+  116], em 225ms. Quase todo esse tempo é de rede e de abrir a
+  conexão. Os prints 08 e 09 mostram esse teste.
+
 --------------------------------------------------------------
 IMPRESSÕES
 --------------------------------------------------------------
@@ -110,6 +122,8 @@ CONCLUSÃO
   8 núcleos, e o vetor ainda viaja pela rede (mesmo sendo local)
   na ida, na volta e nos mergeamentos. O ganho só deve aparecer
   com os servidores em máquinas diferentes, como vai ser na
-  demonstração em sala. Mesmo assim, o mergeamento final é feito
-  por um único servidor e o vetor inteiro passa por ele, então
-  essa parte continua sendo um gargalo.
+  demonstração em sala. O teste com o servidor rodando em outro
+  computador já mostrou que a comunicação pela rede funciona.
+  Mesmo assim, o mergeamento final é feito por um único
+  servidor e o vetor inteiro passa por ele, então essa parte
+  continua sendo um gargalo.
