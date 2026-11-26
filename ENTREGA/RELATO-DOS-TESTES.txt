@@ -1,0 +1,10 @@
+RELATO DOS TESTES - 1º Trabalho de Programação Paralela e Distribuída - Grupo 9
+
+Rodei tudo no meu notebook (Apple M2, 8 processadores, então 7 ordenadoras, 8GB de RAM, Java 27, com -Xmx6G).
+Primeiro conferi se ordenava certo: com 1, 7, 8, 1.000 e 100.003 elementos os dois programas devolveram o vetor em ordem e com o tamanho certo. Digitando [38, 27, 43, 3, 9, 82, 10, -128], saiu [-128, 3, 9, 10, 27, 38, 43, 82].
+Também testei entradas erradas ("abc" na quantidade, 300 num byte, "talvez" no true/false, intervalo inválido, opção que não existe) e o programa só avisou e perguntou de novo, sem travar.
+Depois medi os tempos, rodando cada caso 3 vezes com vetor aleatório (média, paralelo x sequencial):
+  1 milhão: 93ms x 75ms | 10 milhões: 260ms x 684ms | 50 milhões: 925ms x 3.509ms
+  100 milhões: 1.670ms x 7.164ms | 500 milhões: 9.490ms x 39.814ms
+Com 1 milhão o sequencial ganhou, porque criar as threads e copiar os pedaços pesa mais do que o ganho. A partir de 10 milhões o paralelo passa na frente e chega a ser umas 4 vezes mais rápido.
+Não chegou a 7x porque as últimas rodadas de mistura usam poucas threads (a última usa só uma) e porque metade dos núcleos do M2 são de eficiência, mais lentos.

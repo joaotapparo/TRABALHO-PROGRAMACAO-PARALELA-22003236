@@ -1,0 +1,79 @@
+DIÁRIO DE DESENVOLVIMENTO
+1º Trabalho de Programação Paralela e Distribuída em Java - Grupo 9
+RA 22003236 - João Victor Rokemback Tapparo
+
+--------------------------------------------------------------
+CRONOLOGIA
+--------------------------------------------------------------
+
+01/10 07:43
+  Comecei criando a pasta do trabalho e trouxe a classe Teclado
+  que a gente já usa nos exemplos da aula, pra ler os números
+  digitados sem o programa quebrar se o usuário digitar besteira.
+
+01/10 07:45 ~ 08:30
+  Fiz a primeira versão do programa paralelo. A main divide o
+  vetor em (processadores - 1) pedaços mais ou menos do mesmo
+  tamanho e entrega cada um pra uma TarefaOrdenadora, que ordena
+  o seu pedaço com merge sort recursivo. Depois criei a
+  TarefaMisturadora, que pega dois pedaços já ordenados e
+  intercala num só. Coloquei a main pra dar join em cada tarefa
+  antes de pegar o resultado e, pra garantir isso, o
+  getOrdenado() e o getMisturado() lançam exceção se forem
+  chamados antes da thread terminar.
+  As misturadoras rodam em rodadas: a cada rodada a quantidade
+  de pedaços cai pela metade. Como no meu notebook ficam 7
+  ordenadoras (número ímpar), precisei tratar o pedaço que sobra
+  sem par: ele só passa direto pra próxima rodada.
+
+01/10 08:31 ~ 08:32
+  Peguei o enunciado impresso em sala e, lendo com calma, vi que
+  tinha coisa que eu não tinha feito:
+    - o vetor tinha que ser byte, e eu tinha feito com int;
+    - faltavam mensagens de log nos programas;
+    - faltava a versão sem paralelismo pra comparar os tempos.
+
+01/10 08:32 ~ 08:41
+  Corrigi tudo isso. Troquei o vetor pra byte[] em todas as
+  classes, coloquei logs "[log] ..." mostrando a divisão do
+  vetor, o início e o fim de cada ordenadora e misturadora, as
+  rodadas e o tempo total, e fiz o ProgramaSequencial, que usa o
+  mesmo merge sort só que sem nenhuma thread. Também fiz o menu
+  do final, onde dá pra ver o vetor inteiro, só um pedaço dele
+  ou o tempo da ordenação. Testei rapidinho com até 5 milhões
+  de elementos e funcionou.
+
+04/10 18:00 ~ 18:30
+  Fiz os testes finais (estão no RELATO-DOS-TESTES.txt). Conferi
+  se o vetor saía ordenado em vários tamanhos, testei entradas
+  erradas e medi o tempo dos dois programas de 1 milhão até 500
+  milhões de elementos, rodando cada um 3 vezes. Por último tirei
+  os prints que estão na pasta prints.
+
+--------------------------------------------------------------
+IMPRESSÕES
+--------------------------------------------------------------
+  O que mais deu trabalho foi organizar as rodadas de mistura
+  quando sobra pedaço ímpar, e ter certeza de que a main nunca
+  pegava um resultado antes do join. O que eu achei mais legal
+  foi ver na prática que paralelizar nem sempre vale a pena: com
+  1 milhão de elementos a versão sequencial foi mais rápida, e a
+  diferença só apareceu mesmo com vetores grandes.
+
+--------------------------------------------------------------
+CONCLUSÃO
+--------------------------------------------------------------
+  Fiz o trabalho sozinho e consegui atender o que o enunciado
+  pede: o programa usa exatamente (processadores - 1) threads
+  ordenadoras, junta os resultados de 2 em 2 com as misturadoras
+  em rodadas esperando cada uma com join, e chega no mesmo
+  resultado da versão sequencial.
+  Com vetores grandes a versão paralela ficou umas 4 vezes mais
+  rápida (com 100 milhões de elementos foi 1,7s contra 7,2s). Com
+  vetores pequenos não compensa, porque criar as threads e
+  copiar os pedaços custa mais do que o que se ganha. Esperava
+  chegar perto de 7x, mas as últimas rodadas de mistura usam
+  poucas threads (a última usa uma só pro vetor inteiro), então
+  essa parte acaba sendo quase sequencial. Usar byte ajudou
+  bastante, porque deu pra testar até 500 milhões de elementos
+  sem estourar a memória.

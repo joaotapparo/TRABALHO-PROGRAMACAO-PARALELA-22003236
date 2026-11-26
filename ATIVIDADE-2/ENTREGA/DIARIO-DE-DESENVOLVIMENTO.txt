@@ -1,0 +1,115 @@
+DIÁRIO DE DESENVOLVIMENTO
+2º Trabalho de Programação Paralela e Distribuída em Java - Grupo 9
+RA 22003236 - João Victor Rokemback Tapparo
+
+--------------------------------------------------------------
+CRONOLOGIA
+--------------------------------------------------------------
+
+26/11 08:36
+  Li o enunciado da 2ª atividade e revisei os dois exemplos de
+  programação distribuída da aula: o "1 servidor e N clientes"
+  (Fazedor de Continhas) e o "1 cliente (coordenador) e N
+  servidores (trabalhadores)" (Somador Distribuído). Decidi
+  montar o trabalho em cima deles: Parceiro, Comunicado,
+  AceitadoraDeConexao e SupervisoraDeConexao do servidor, e uma
+  thread por conversa no cliente, como o ConversaComTrabalhador.
+  Criei a pasta ATIVIDADE-2, com as subpastas Servidor e
+  Cliente, sem mexer na atividade 1.
+
+26/11 08:37
+  Escrevi as mensagens, todas herdando de Comunicado, iguais nas
+  duas pastas:
+    - PedidoDeOrdenacao e PedidoDeMergeamento (o cliente pede);
+    - OrdenacaoPronta e MergeamentoPronto (o servidor avisa);
+    - PedidoDeResultado e Resultado (que carrega o vetor);
+    - PedidoParaSair e ComunicadoDeDesligamento (iguais aos da aula);
+    - PedidoDeCapacidade e Capacidade, que não estão no enunciado,
+      mas foram necessárias pra o cliente saber quantos
+      processadores tem cada servidor e dividir o vetor de forma
+      proporcional.
+  No Parceiro acrescentei um reset() depois de cada envio. Sem
+  ele o ObjectOutputStream guarda referência pra todo vetor já
+  enviado e, com vetores de milhões de elementos, a memória não
+  é liberada.
+
+26/11 08:38 ~ 08:39
+  Fiz o servidor. O que sobrou do programa da atividade 1 (as
+  TarefasOrdenadoras e as rodadas de TarefasMisturadoras) virou a
+  classe OrdenacaoParalela, com o mesmo código e os mesmos logs.
+  A main inicia a AceitadoraDeConexao e fica esperando o comando
+  DESATIVAR. A AceitadoraDeConexao aceita uma conexão, inicia a
+  SupervisoraDeConexao e dá join nela, então só atende outro
+  cliente quando o atual manda PedidoParaSair. A Supervisora
+  ordena com a OrdenacaoParalela, mergeia com uma
+  TarefaMisturadora e guarda o vetor resultante até o cliente
+  pedir o Resultado.
+
+26/11 08:40 ~ 08:41
+  Fiz o cliente. A parte de perguntar o tamanho do vetor e de
+  digitar ou sortear os valores veio da main da atividade 1. Os
+  servidores são passados nos args como HOST:PORTA. O cliente se
+  conecta em cada um, pergunta a capacidade e calcula o tamanho
+  de cada pedaço proporcional aos processadores (o resto da
+  divisão vai, um a um, pros primeiros). Depois dispara uma
+  ConversaDeOrdenacao por servidor, todas ao mesmo tempo, e dá
+  join em todas. Os pedaços ordenados são juntados em rodadas,
+  como na atividade 1, só que cada dupla é mergeada por um
+  servidor diferente (ConversaDeMergeamento). No final ele manda
+  PedidoParaSair pra todos e mostra o mesmo menu da atividade 1.
+  Coloquei uma verificação pra não deixar o mesmo servidor
+  aparecer duas vezes nos args: como ele atende um cliente por
+  vez, o cliente ficaria esperando por ele mesmo pra sempre.
+
+26/11 08:41 ~ 08:42
+  Primeiros testes com 3 servidores no meu notebook, em portas
+  diferentes (3001, 3002 e 3003): vetor digitado, vetor aleatório
+  de 5 milhões, dois clientes em sequência, um cliente esperando
+  enquanto outro ocupava o servidor e o comando DESATIVAR.
+  Funcionou tudo de primeira.
+
+26/11 08:43 ~ 08:49
+  Escrevi o LEIA-ME, medi os tempos (estão no
+  RELATO-DOS-TESTES.txt) e tirei os prints que estão na pasta
+  prints. Numa das medições os testes com 3 servidores não
+  rodaram. Era erro do meu script de teste: o zsh não separa uma
+  variável em vários argumentos, então o cliente recebia os 3
+  servidores como um só. O programa estava certo. No print do
+  segundo cliente esperando, a primeira tentativa não mostrou a
+  espera, porque gerar 100 milhões de números aleatórios demora
+  mais do que eu pensava e o segundo cliente acabou conectando
+  primeiro. Refiz esperando o primeiro cliente conectar antes de
+  soltar o segundo.
+
+--------------------------------------------------------------
+IMPRESSÕES
+--------------------------------------------------------------
+  Aproveitar os exemplos da aula ajudou muito: a parte de
+  sockets e de troca de Comunicados já estava pronta e testada,
+  e o trabalho foi mais decidir quais mensagens trocar e em que
+  ordem. O join da AceitadoraDeConexao é uma solução simples pra
+  atender um cliente por vez: o próprio ServerSocket deixa os
+  outros clientes esperando na fila. O que mais me fez pensar foi
+  o mergeamento distribuído. Como cada rodada tem no máximo
+  metade dos pedaços em duplas, e há no máximo um pedaço por
+  servidor, cada servidor recebe no máximo um pedido por rodada,
+  e nenhuma conversa disputa a mesma conexão com outra.
+
+--------------------------------------------------------------
+CONCLUSÃO
+--------------------------------------------------------------
+  O sistema faz o que o enunciado pede: o cliente pergunta o
+  tamanho e o modo de preencher o vetor, divide em pedaços
+  proporcionais ao poder computacional de cada servidor, e cada
+  servidor ordena o seu pedaço paralelamente, como na atividade
+  1. O servidor atende um cliente por vez com o join e pode ser
+  encerrado com DESATIVAR.
+  Nos testes, rodando os 3 servidores no mesmo notebook, usar 3
+  servidores foi mais lento do que usar 1 (100 milhões: ~2,7s
+  contra ~2,1s). Isso já era esperado: os três disputam os mesmos
+  8 núcleos, e o vetor ainda viaja pela rede (mesmo sendo local)
+  na ida, na volta e nos mergeamentos. O ganho só deve aparecer
+  com os servidores em máquinas diferentes, como vai ser na
+  demonstração em sala. Mesmo assim, o mergeamento final é feito
+  por um único servidor e o vetor inteiro passa por ele, então
+  essa parte continua sendo um gargalo.
